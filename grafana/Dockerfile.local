@@ -1,0 +1,27 @@
+# Local testing Dockerfile for Grafana
+FROM grafana/grafana:10.2.0
+
+# Switch to root user to install dependencies
+USER root
+
+# Copy local Grafana configuration
+COPY grafana-local.ini /etc/grafana/grafana.ini
+
+# Copy provisioning configurations
+COPY provisioning/ /etc/grafana/provisioning/
+
+# Create directories for plugins and dashboards
+RUN mkdir -p /var/lib/grafana/plugins && \
+    mkdir -p /etc/grafana/provisioning/dashboards && \
+    mkdir -p /etc/grafana/provisioning/datasources && \
+    mkdir -p /etc/grafana/provisioning/notifiers
+
+# Switch back to grafana user
+USER grafana
+
+# Expose Grafana port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD wget -q --spider http://localhost:3000/api/health || exit 1

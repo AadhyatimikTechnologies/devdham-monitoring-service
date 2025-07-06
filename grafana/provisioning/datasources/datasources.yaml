@@ -1,0 +1,52 @@
+apiVersion: 1
+
+datasources:
+  # Google Cloud Monitoring data source
+  - name: Google Cloud Monitoring
+    type: stackdriver
+    access: proxy
+    isDefault: false
+    jsonData:
+      authenticationType: gce
+      defaultProject: devdham-production-16
+    editable: true
+    orgId: 1
+    version: 1
+
+  # Managed Prometheus data source  
+  - name: Managed Prometheus
+    type: prometheus
+    access: proxy
+    url: https://monitoring.googleapis.com/v1/projects/devdham-production-16/location/global/prometheus
+    isDefault: false
+    jsonData:
+      authenticationType: gce
+      httpMethod: GET
+      manageAlerts: false
+      prometheusType: Prometheus
+      cacheLevel: Medium
+    editable: true
+    orgId: 1
+    version: 1
+
+  # Cloud Logging data source (for log analysis)
+  - name: Cloud Logging
+    type: stackdriver
+    access: proxy
+    isDefault: false
+    jsonData:
+      authenticationType: gce
+      defaultProject: devdham-production-16
+      serviceAccountType: gce
+    editable: true
+    orgId: 1
+    version: 1
+
+  # TestData data source (for testing dashboards)
+  - name: TestData
+    type: testdata
+    access: proxy
+    isDefault: false
+    editable: false
+    orgId: 1
+    version: 1

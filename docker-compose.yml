@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  grafana:
+    build:
+      context: ./grafana
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # Database configuration
+      GF_DATABASE_PASSWORD: ${GF_DATABASE_PASSWORD:-development_password}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      GF_SECURITY_SECRET_KEY: ${GF_SECURITY_SECRET_KEY:-development_secret_key}
+      
+      # Google OAuth (optional for local development)
+      GF_AUTH_GOOGLE_CLIENT_ID: ${GF_AUTH_GOOGLE_CLIENT_ID:-}
+      GF_AUTH_GOOGLE_CLIENT_SECRET: ${GF_AUTH_GOOGLE_CLIENT_SECRET:-}
+      
+      # Local development overrides
+      GF_SERVER_DOMAIN: localhost
+      GF_SERVER_ROOT_URL: http://localhost:3000
+      GF_DATABASE_TYPE: sqlite3
+      GF_DATABASE_PATH: /var/lib/grafana/grafana.db
+      
+      # Disable authentication for local development
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./dashboards:/etc/grafana/provisioning/dashboards
+      - ./alerts:/etc/grafana/provisioning/alerting
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  grafana_data:
+    driver: local
+
+networks:
+  default:
+    name: devdham_monitoring

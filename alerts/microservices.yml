@@ -1,0 +1,93 @@
+# Alert rules for DevDham microservices monitoring
+groups:
+  - name: microservices.rules
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status_code=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "High error rate detected in {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }} for service {{ $labels.service }}"
+
+      # High response time alert
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "High response time in {{ $labels.service }}"
+          description: "95th percentile response time is {{ $value }}s for service {{ $labels.service }}"
+
+      # Service down alert
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute"
+
+      # High memory usage alert
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 400
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "High memory usage in {{ $labels.service }}"
+          description: "Memory usage is {{ $value }}MB for service {{ $labels.service }}"
+
+      # Database connection failures
+      - alert: DatabaseConnectionFailures
+        expr: rate(database_connections_failed_total[5m]) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "Database connection failures in {{ $labels.service }}"
+          description: "Database connection failure rate is {{ $value | humanizePercentage }} for service {{ $labels.service }}"
+
+      # High request rate
+      - alert: UnusualRequestVolume
+        expr: rate(http_requests_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "Unusual request volume in {{ $labels.service }}"
+          description: "Request rate is {{ $value }} req/s for service {{ $labels.service }}"
+
+  - name: grafana.rules
+    rules:
+      # Grafana service health
+      - alert: GrafanaDown
+        expr: up{job="grafana-monitoring"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: grafana
+        annotations:
+          summary: "Grafana monitoring service is down"
+          description: "Grafana has been down for more than 1 minute"
+
+      # Grafana high response time
+      - alert: GrafanaSlowResponse
+        expr: histogram_quantile(0.95, rate(grafana_http_request_duration_seconds_bucket[5m])) > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: grafana
+        annotations:
+          summary: "Grafana is responding slowly"
+          description: "95th percentile response time is {{ $value }}s for Grafana"

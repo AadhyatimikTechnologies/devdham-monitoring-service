@@ -1,0 +1,74 @@
+# Managed Prometheus configuration for DevDham microservices
+# This configuration enables Google Cloud Managed Service for Prometheus
+# across all microservices in the Backend Microservices architecture
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'devdham-production'
+    environment: 'production'
+    project: 'devdham-production-16'
+
+# Scrape configuration for microservices
+scrape_configs:
+  # Event microservice
+  - job_name: 'event-microservice'
+    static_configs:
+      - targets: ['event-service-w3rijl5o6q-el.a.run.app:443']
+    scheme: https
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    params:
+      format: ['prometheus']
+
+  # User microservice (when available)
+  - job_name: 'user-microservice'
+    static_configs:
+      - targets: ['user-service.devdham.com:443']
+    scheme: https
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    params:
+      format: ['prometheus']
+
+  # Order microservice (when available)  
+  - job_name: 'order-microservice'
+    static_configs:
+      - targets: ['order-service.devdham.com:443']
+    scheme: https
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    params:
+      format: ['prometheus']
+
+  # Grafana monitoring service
+  - job_name: 'grafana-monitoring'
+    static_configs:
+      - targets: ['grafana-devdham-w3rijl5o6q-el.a.run.app:443']
+    scheme: https
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+    scrape_timeout: 10s
+
+# Alerting rules for microservices monitoring
+rule_files:
+  - "alerts/*.yml"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Remote write configuration for Google Cloud Monitoring
+remote_write:
+  - url: "https://monitoring.googleapis.com/v1/projects/devdham-production-16/location/global/prometheus/api/v1/write"
+    queue_config:
+      max_samples_per_send: 1000
+      max_shards: 200
+      capacity: 2500

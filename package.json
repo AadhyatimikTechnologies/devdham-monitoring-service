@@ -1,0 +1,44 @@
+{
+  "name": "devdham-monitoring",
+  "version": "1.0.0",
+  "description": "DevDham monitoring and observability microservice with Grafana on Cloud Run",
+  "main": "index.js",
+  "scripts": {
+    "build": "docker build -t gcr.io/devdham-production-16/grafana ./grafana/",
+    "deploy:dev": "./scripts/deploy.sh development",
+    "deploy:prod": "./scripts/deploy.sh production",
+    "local:up": "docker-compose up -d",
+    "local:down": "docker-compose down",
+    "local:logs": "docker-compose logs -f grafana",
+    "validate:dashboards": "node scripts/validate-dashboards.js",
+    "backup:config": "./scripts/backup-config.sh",
+    "test:endpoints": "./scripts/test-endpoints.sh"
+  },
+  "keywords": [
+    "monitoring",
+    "grafana",
+    "prometheus",
+    "observability",
+    "cloud-run",
+    "devdham"
+  ],
+  "author": "DevDham Platform Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devdham/backend-microservices"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
+  },
+  "dependencies": {},
+  "config": {
+    "project_id": "devdham-production-16",
+    "region": "asia-south1",
+    "service_name": "grafana"
+  }
+}

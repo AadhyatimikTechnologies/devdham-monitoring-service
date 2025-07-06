@@ -1,0 +1,5 @@
+apiVersion: 1
+
+# Notification channels will be configured after deployment
+# when environment variables and webhooks are available
+notifiers: []
