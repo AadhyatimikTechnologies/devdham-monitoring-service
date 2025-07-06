@@ -61,16 +61,16 @@ steps:
   - name: 'gcr.io/cloud-builders/curl'
     args: [
       '-f', '-s', '--retry', '10', '--retry-delay', '15',
-      'https://grafana-${_SERVICE_SUFFIX}.run.app/api/health'
+      'https://v1-grafana-w3rijl5o6q-el.a.run.app/api/health'
     ]
     id: 'health-check'
-    waitFor: ['update-traffic']
+    waitFor: ['deploy-grafana']
 
   # Additional Grafana-specific health checks
   - name: 'gcr.io/cloud-builders/curl'
     args: [
       '-s', '--retry', '3', '--retry-delay', '5',
-      'https://grafana-${_SERVICE_SUFFIX}.run.app/login'
+      'https://v1-grafana-w3rijl5o6q-el.a.run.app/login'
     ]
     id: 'grafana-login-check'
     waitFor: ['health-check']
